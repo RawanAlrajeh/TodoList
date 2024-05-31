@@ -1,37 +1,25 @@
-// Import React and hooks from the React library
 import React, { useState, useEffect } from "react";
-// Import Sidebar component for navigation
 import Sidebar from "../../components/Sidebar/Sidebar";
 import MainContent from "./components/Todo/MainContent";
 import TaskDetails from "./components/Todo/TaskDetails";
 
-
 const TodoPage = () => {
-  // State to store the list of tasks
-  const [tasks, setTasks] = useState([]);
-  // State to keep track of the selected task for details view
+  // Initialize state with items from local storage
+  const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  const [tasks, setTasks] = useState(storedTasks);
   const [selectedTask, setSelectedTask] = useState(null);
-  // State to manage the current view/filter (e.g., today, upcoming)
   const [view, setView] = useState("today");
-  // State for storing the current search query to filter tasks
   const [searchQuery, setSearchQuery] = useState("");
-  // State to manage the dark mode setting
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
 
-  // Effect to load tasks from local storage on initial load
-  useEffect(() => {
-    const storedTasks = localStorage.getItem("tasks");
-    if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
-    }
-  }, []);
-
-  // Effect to save tasks to local storage whenever the tasks array changes
+  // Save tasks to local storage whenever the tasks array changes
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
-  // Effect to manage dark mode settings and store preference in local storage
+  // Save theme preference to local storage whenever darkMode changes
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
@@ -42,12 +30,11 @@ const TodoPage = () => {
     }
   }, [darkMode]);
 
-  // Function to add a new task to the tasks array
   const addTask = (task) => {
-    setTasks([...tasks, { ...task, status: "todo" }]);
+    const updatedTasks = [...tasks, { ...task, id: Date.now(), status: "todo" }];
+    setTasks(updatedTasks);
   };
 
-  // Function to update an existing task
   const editTask = (updatedTask) => {
     const updatedTasks = tasks.map((task) =>
       task.id === updatedTask.id ? updatedTask : task
@@ -55,14 +42,12 @@ const TodoPage = () => {
     setTasks(updatedTasks);
   };
 
-  // Function to delete a task from the list
   const deleteTask = (id) => {
     const filteredTasks = tasks.filter((task) => task.id !== id);
     setTasks(filteredTasks);
     setSelectedTask(null);
   };
 
-  // Function to toggle the completion status of a task
   const toggleComplete = (id) => {
     const updatedTasks = tasks.map((task) =>
       task.id === id ? { ...task, completed: !task.completed } : task
@@ -70,17 +55,14 @@ const TodoPage = () => {
     setTasks(updatedTasks);
   };
 
-  // Function to handle changes in the current view
   const handleViewChange = (view) => {
     setView(view);
   };
 
-  // Function to update the search query state based on user input
   const handleSearchChange = (query) => {
     setSearchQuery(query);
   };
 
-  // Function to filter tasks based on the current view and search query
   const getTasksForView = () => {
     const today = new Date().toISOString().split("T")[0];
     let filteredTasks = tasks;
@@ -100,12 +82,10 @@ const TodoPage = () => {
     return filteredTasks;
   };
 
-  // Function to toggle the theme between light and dark mode
   const toggleTheme = () => {
     setDarkMode(!darkMode);
   };
 
-  // JSX structure for the TodoApp component
   return (
     <div className="flex h-screen">
       <Sidebar
@@ -114,7 +94,6 @@ const TodoPage = () => {
         view={view}
         toggleTheme={toggleTheme}
       />
-     
       <div className="flex-1 flex">
         <MainContent
           tasks={getTasksForView()}
