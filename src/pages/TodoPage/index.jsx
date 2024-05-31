@@ -18,19 +18,19 @@ const TodoPage = () => {
   // State to manage the dark mode setting
   const [darkMode, setDarkMode] = useState(false);
 
-  // Effect to load tasks from local storage on initial load
-  useEffect(() => {
+   // Load tasks from local storage only once when the component mounts
+   useEffect(() => {
     const storedTasks = localStorage.getItem("tasks");
     if (storedTasks) {
       setTasks(JSON.parse(storedTasks));
     }
   }, []);
 
-  // Effect to save tasks to local storage whenever the tasks array changes
+  // Save tasks to local storage whenever the tasks array changes
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
-
+  
   // Effect to manage dark mode settings and store preference in local storage
   useEffect(() => {
     if (darkMode) {
@@ -44,7 +44,9 @@ const TodoPage = () => {
 
   // Function to add a new task to the tasks array
   const addTask = (task) => {
-    setTasks([...tasks, { ...task, status: "todo" }]);
+    const updatedTasks = [...tasks, { ...task, id: Date.now(), status: "todo" }];
+    setTasks(updatedTasks);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks)); // Ensure tasks are saved to local storage
   };
 
   // Function to update an existing task
@@ -53,6 +55,7 @@ const TodoPage = () => {
       task.id === updatedTask.id ? updatedTask : task
     );
     setTasks(updatedTasks);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks)); // Ensure tasks are updated in local storage
   };
 
   // Function to delete a task from the list
@@ -60,7 +63,8 @@ const TodoPage = () => {
     const filteredTasks = tasks.filter((task) => task.id !== id);
     setTasks(filteredTasks);
     setSelectedTask(null);
-  };
+    localStorage.setItem("tasks", JSON.stringify(filteredTasks)); // Ensure tasks are updated in local storage
+  }
 
   // Function to toggle the completion status of a task
   const toggleComplete = (id) => {
@@ -68,6 +72,7 @@ const TodoPage = () => {
       task.id === id ? { ...task, completed: !task.completed } : task
     );
     setTasks(updatedTasks);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks)); // Ensure tasks are updated in local storage
   };
 
   // Function to handle changes in the current view
